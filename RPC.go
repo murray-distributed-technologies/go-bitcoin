@@ -457,6 +457,16 @@ func (b *Bitcoind) SendRawTransactionWithoutFeeCheck(hex string) (txid string, e
 	return
 }
 
+func (b *Bitcoind) GetMerkleProof(txid, blockhash string, txOrId bool, targetType, format string) (raw *MerkleProofResponse, err error) {
+	p := []interface{}{txid, blockhash, txOrId, targetType, format}
+	r, err := b.call("getmerkleproof2", p)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(r.Result, &raw)
+	return
+}
+
 type BatchedTransaction struct {
 	Hex                      string                 `json:"hex"`
 	AllowHighFees            bool                   `json:"allowhighfees"`
@@ -468,6 +478,14 @@ type BatchedTransaction struct {
 type TxResponse struct {
 	TxID         string `json:"txid"`
 	RejectReason string `json:"reject_reason"`
+}
+
+type MerkleProofResponse struct {
+	Index      int      `json:"index"`
+	TxOrId     string   `json:"txOrId"`
+	TargetType string   `json:"targetType"`
+	Target     string   `json:"target"`
+	Nodes      []string `json:"nodes"`
 }
 
 type BatchResults struct {
